@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8" />
     <title th:text="${titulo}"></title>
 </head>
-
 <body>
 <form th:action="@{/alumnos/agregar}" method="POST">
     <h1 th:text="${titulo}"></h1>
@@ -16,8 +14,6 @@
             <input type="text" name="nombre" id="nombre" th:value="${alumno.nombre}">
         </div>
         <div th:if="${error != null && error.containsKey('nombre')}" th:text="${error.nombre}"></div>
-
-
     </div>
     <div>
         <label for="apellido">Apellido</label>
@@ -33,5 +29,4 @@
     </div>
 </form>
 </body>
-
 </html>

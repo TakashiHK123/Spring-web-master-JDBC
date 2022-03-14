@@ -18,16 +18,12 @@ import java.util.List;
 @SpringBootApplication
 
 public class SpringWebApplication{
-	//private static final String SQL="SELECT * FROM alumnos";
-	//@Autowired
-	//private JdbcTemplate jdbcTemplate;
 
 	public static void main(String[] args){
 		SpringApplication.run(SpringWebApplication.class, args);
 	}
 	public void run(String... args) {
 
-		System.out.println("TRUE");
 	}
 
 

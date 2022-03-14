@@ -4,6 +4,7 @@ import com.bolsadeideas.springboot.web.app.RowMapper.AlumnoRowMapper;
 import com.bolsadeideas.springboot.web.app.SQLErrorCode.CustomSQLErrorCodeTranslator;
 import com.bolsadeideas.springboot.web.app.entity.Alumno;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -30,23 +31,24 @@ public class AlumnoDAO {
 
     private static final String SQL="SELECT * FROM alumnos";
     private static final String SQL_INSERT = "INSERT INTO alumnos (nombre, apellido) VALUES (?, ?)";
-
+    private static final String SQL_DELETE = "DELETE FROM alumnos WHERE idalumno=?";
+    private static final String SQL_GET = "SELECT * FROM alumnos WHERE idalumno = ?";
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
+    @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
+    @Autowired
     private SimpleJdbcInsert simpleJdbcInsert;
-
+    @Autowired
+    @Qualifier("sjc")
     private SimpleJdbcCall simpleJdbcCall;
 
 
-    //@Autowired
+    @Autowired
     public void setDataSource(final DataSource dataSource){
         jdbcTemplate = new JdbcTemplate(dataSource);
         final CustomSQLErrorCodeTranslator customSQLErrorCodeTranslator = new CustomSQLErrorCodeTranslator();
         jdbcTemplate.setExceptionTranslator(customSQLErrorCodeTranslator);
-
         namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("alumnos");
 
@@ -56,7 +58,6 @@ public class AlumnoDAO {
     public int getCountOfAlumnos() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM alumnos", Integer.class);
     }
-
 
     public List<Alumno> getAll() {
         return jdbcTemplate.query(SQL, new AlumnoRowMapper());
@@ -87,7 +88,6 @@ public class AlumnoDAO {
         return alumno;
     }
 
-
     public int addAlumnoUsingSimpelJdbcInsert(final Alumno alumno) {
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("idalumno", alumno.getIdAlumno());
@@ -97,8 +97,16 @@ public class AlumnoDAO {
     }
 
     public Alumno getAlumno(int idalumno) {
-        final String sql = "SELECT * FROM alumnos WHERE idalumno = ?";
-        return jdbcTemplate.queryForObject(sql, new Object[] { idalumno }, new AlumnoRowMapper());
+        Alumno alumno = jdbcTemplate.queryForObject(SQL_GET, new Object[] { idalumno }, new AlumnoRowMapper());
+        if(alumno!=null){
+            return alumno;
+        }else{
+            return null;
+        }
+    }
+
+    public int deleteAlu(int idalumno) {
+        return jdbcTemplate.update(SQL_DELETE, idalumno);
     }
 
     public void addEmplyeeUsingExecuteMethod() {
@@ -119,32 +127,45 @@ public class AlumnoDAO {
             public void setValues(final PreparedStatement preparedStatement, final int i) throws SQLException {
                 preparedStatement.setString(1, alumnos.get(i).getNombre());
                 preparedStatement.setString(2, alumnos.get(i).getApellido());
-
             }
-
             @Override
             public int getBatchSize() {
                 return 3;
             }
         });
     }
-
     public int[] batchUpdateUsingNamedParameterJDBCTemplate(final List<Alumno> Alumnos) {
         final SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(Alumnos.toArray());
         final int[] updateCounts = namedParameterJdbcTemplate.batchUpdate("INSERT INTO alumnos VALUES (:idalumno, :nombre, :apellido)", batch);
         return updateCounts;
     }
-
     public Alumno getAlumnoUsingSimpleJdbcCall(int id) {
         SqlParameterSource in = new MapSqlParameterSource().addValue("idalumno", id);
         Map<String, Object> out = simpleJdbcCall.execute(in);
-
         Alumno alu = new Alumno();
         alu.setNombre((String) out.get("nombre"));
         alu.setApellido((String) out.get("apellido"));
-
         return alu;
     }
 
+    public Alumno getAlumnoUsingJdbcCallNombre(String nombre){
+        SqlParameterSource in = new MapSqlParameterSource().addValue("nombre", nombre);
+        Map<String, Object> out = simpleJdbcCall.execute(in);
+        Alumno alu = new Alumno();
+        alu.setIdAlumno((int) out.get("idalumno")) ;
+        alu.setApellido((String) out.get("nombre"));
+        alu.setApellido((String) out.get("apellido"));
+        return alu;
+    }
+
+    public Alumno getAlumnoUsingJdbcCallApellido(String apellido){
+        SqlParameterSource in = new MapSqlParameterSource().addValue("apellido", apellido);
+        Map<String, Object> out = simpleJdbcCall.execute(in);
+        Alumno alu = new Alumno();
+        alu.setIdAlumno((int) out.get("idalumno")) ;
+        alu.setApellido((String) out.get("nombre"));
+        alu.setApellido((String) out.get("apellido"));
+        return alu;
+    }
 
 }

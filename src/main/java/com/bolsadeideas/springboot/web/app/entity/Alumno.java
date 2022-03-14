@@ -1,13 +1,24 @@
 package com.bolsadeideas.springboot.web.app.entity;
 
 
-import org.springframework.stereotype.Repository;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.Serializable;
 
 
-public class Alumno {
+public class Alumno implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    @NotNull
+    @Min(1)
+    @Max(99999999)
     private int idAlumno;
+    @NotEmpty
     private String nombre;
+    @NotEmpty
     private String apellido;
 
     public Alumno() {

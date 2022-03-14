@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<title th:text="${titulo}"></title>
+</head>
+<body>
+<form th:action="@{/alumnos/buscar}" method="POST">
+	<h1 th:text="${titulo}"></h1>
+	<div>
+		<label for="idAlumno">ID Alumno</label>
+		<div>
+			<input type="number" name="idAlumno" id="idAlumno" th:value="${alumno.idAlumno}">
+		</div>
+		<div th:if="${error != null && error.containsKey('idAlumno')}" th:text="${error.idAlumno}"></div>
+	</div>
+	<div>
+		<div>
+			<input type="submit" value="Buscar">
+		</div>
+	</div>
+</form>
+</body>
+</html>
