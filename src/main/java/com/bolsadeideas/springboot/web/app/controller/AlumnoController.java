@@ -28,7 +28,6 @@ public class AlumnoController {
 
     @GetMapping("/listar")
     public String listaAlu(Model model) {
-
         List<Alumno> alumnos = new ArrayList<>();
         alumnos = alumnoDao.getAll();
         model.addAttribute("titulo", "Lista de Alumnos");
@@ -87,37 +86,56 @@ public class AlumnoController {
 
     @PostMapping("/buscar")
     public String buscarAlu(@Valid Alumno alumno, BindingResult result, Model model,
-                            @RequestParam(name= "idAlumno") int idAlumno) throws SQLException {
-        if (idAlumno>0) {
-            alumno = alumnoDao.getAlumno(idAlumno);
-            if(alumno!=null){
-                model.addAttribute("idalumno", "IdAlumno");
-                model.addAttribute("nombre", "Nombre");
-                model.addAttribute("apellido", "Apellido");
-                model.addAttribute("titulo", "Alumno Encontrado");
-                model.addAttribute("alumno", alumno);
-            }else {
-                model.addAttribute("idalumno", "");
-                model.addAttribute("nombre", "");
-                model.addAttribute("apellido", "");
-                model.addAttribute("titulo", "Alumno no se encuentra en la base de datos");
-                model.addAttribute("alumno", alumno);
+                            @RequestParam(name= "idAlumno") String idAlumno) throws SQLException {
+        try{
+            int idBuscar =Integer.parseInt(idAlumno);
+            if (idBuscar>0) {
+                try{
+                    alumno = alumnoDao.getAlumno(idBuscar);
+                    if(alumno!=null){
+                        model.addAttribute("idalumno", "IdAlumno");
+                        model.addAttribute("nombre", "Nombre");
+                        model.addAttribute("apellido", "Apellido");
+                        model.addAttribute("titulo", "Alumno Encontrado");
+                        model.addAttribute("alumno", alumno);
+                    }
+                } catch (EmptyResultDataAccessException ex) {
+                    Alumno alumno1 =new Alumno();
+                    model.addAttribute("idAlumno", " ");
+                    model.addAttribute("nombre", " ");
+                    model.addAttribute("apellido", " ");
+                    model.addAttribute("titulo", "El alumno no se encuentra en la base de datos");
+                    model.addAttribute("alumno", alumno1);
+                    return "alumno-template/resultado";
+                }
+                catch (NumberFormatException ex){
+                    Map<String, String> errores = new HashMap<>();
+                    result.getFieldErrors().forEach(err -> {
+                        errores.put(err.getField(), "El campo ".concat(err.getField()).concat(" ").concat(err.getDefaultMessage()));
+                    });
+                    model.addAttribute("titulo", "Falta datos");
+                    model.addAttribute("error", errores);
+                    return "alumno-template/buscar";
+                }
+
+            } else if (result.hasErrors()) {
+                Map<String, String> errores = new HashMap<>();
+                result.getFieldErrors().forEach(err -> {
+                    errores.put(err.getField(), "El campo ".concat(err.getField()).concat(" ").concat(err.getDefaultMessage()));
+                });
+                model.addAttribute("titulo", "Falta datos");
+                model.addAttribute("error", errores);
+                return "alumno-template/buscar";
             }
-        } else if (result.hasErrors()) {
+
+        }catch (NumberFormatException ex){
             Map<String, String> errores = new HashMap<>();
             result.getFieldErrors().forEach(err -> {
-                errores.put(err.getField(), "El campo ".concat(err.getField()).concat(" ").concat(err.getDefaultMessage()));
+                errores.put(err.getField(), "El campo no puede estar vacio");
             });
             model.addAttribute("titulo", "Falta datos");
             model.addAttribute("error", errores);
-            //System.out.println("False");
-            return "alumno-template/buscar";
-        }else{
-            model.addAttribute("idalumno", "");
-            model.addAttribute("nombre", "");
-            model.addAttribute("apellido", "");
-            model.addAttribute("titulo", "Alumno no se encuentra en la base de datos");
-            model.addAttribute("alumno", alumno);
+            return "alumno-template/eliminar";
         }
         return "alumno-template/resultado";
     }
@@ -132,53 +150,107 @@ public class AlumnoController {
     }
     @PostMapping("/eliminar")
     public String eliminarAluProc(@Valid Alumno alumno, BindingResult result, Model model,
-                                  @RequestParam(name= "idAlumno") int idAlumno)throws SQLException {
-        if (idAlumno > 0) {
-            try {
-                alumno = alumnoDao.getAlumno(idAlumno);
-
-                if (alumnoDao.deleteAlu(idAlumno) == 0) {
-                    model.addAttribute("idAlumno", " ");
-                    model.addAttribute("nombre", " ");
-                    model.addAttribute("apellido", " ");
-                    model.addAttribute("titulo", "El alumno no se puede eliminar esta referido a otra base de datos");
-                    model.addAttribute("alumno", alumno);
-
-                } else {
-                    if (alumno == null) {
-                        model.addAttribute("idAlumno", " ");
-                        model.addAttribute("nombre", " ");
-                        model.addAttribute("apellido", " ");
-                        model.addAttribute("titulo", "El alumno no se encuentra en la base de datos");
-                        model.addAttribute("alumno", alumno);
-                    } else {
-                        model.addAttribute("idAlumno", "IdAlumno");
+                                  @RequestParam(name= "idAlumno") String idAlumno) throws SQLException {
+        try{
+            int id =Integer.parseInt(idAlumno);
+            if (id>0) {
+                try{
+                    alumno = alumnoDao.getAlumno(id);
+                    if(alumnoDao.deleteAlu(id)==1){
+                        model.addAttribute("idalumno", "IdAlumno");
                         model.addAttribute("nombre", "Nombre");
                         model.addAttribute("apellido", "Apellido");
                         model.addAttribute("titulo", "Alumno Eliminado");
                         model.addAttribute("alumno", alumno);
                     }
-
-                }else if (result.hasErrors()) {
-                    Map<String, String> errores = new HashMap<>();
-                    result.getFieldErrors().forEach(err -> {
-                        errores.put(err.getField(), "El campo ".concat(err.getField()).concat(" ").concat(err.getDefaultMessage()));
-                    });
-                    model.addAttribute("titulo", "Debe ser numero entero");
-                    model.addAttribute("error", errores);
-                    return "alumno-template/eliminar";
+                } catch (EmptyResultDataAccessException ex) {
+                    Alumno alumno1 =new Alumno();
+                    model.addAttribute("idAlumno", " ");
+                    model.addAttribute("nombre", " ");
+                    model.addAttribute("apellido", " ");
+                    model.addAttribute("titulo", "El alumno no se encuentra en la base de datos");
+                    model.addAttribute("alumno", alumno1);
+                    return "alumno-template/resultado";
                 }
-                return "alumno-template/resultado";
-            } catch (EmptyResultDataAccessException ex) {
-                model.addAttribute("idAlumno", " ");
-                model.addAttribute("nombre", " ");
-                model.addAttribute("apellido", " ");
-                model.addAttribute("titulo", "El alumno no se encuentra en la base de datos");
-                model.addAttribute("alumno", alumno);
-                return "alumno-template/resultado";
-            }
 
+            } else if (result.hasErrors()) {
+                Map<String, String> errores = new HashMap<>();
+                result.getFieldErrors().forEach(err -> {
+                    errores.put(err.getField(), "El campo ".concat(err.getField()).concat(" ").concat(err.getDefaultMessage()));
+                });
+                model.addAttribute("titulo", "Falta datos");
+                model.addAttribute("error", errores);
+                return "alumno-template/eliminar";
+            }
+        }catch (NumberFormatException ex){
+            Map<String, String> errores = new HashMap<>();
+            result.getFieldErrors().forEach(err -> {
+                errores.put(err.getField(), "El campo no puede estar vacio");
+            });
+            model.addAttribute("titulo", "Falta datos");
+            model.addAttribute("error", errores);
+            return "alumno-template/eliminar";
         }
+        return "alumno-template/resultado";
+    }
+
+    @GetMapping("/modificar")
+    public String modificarAlu(Model model) {
+        Alumno alumno = new Alumno();
+        model.addAttribute("titulo", "Modificar al Alumno");
+        model.addAttribute("alumno", alumno);
+        model.addAttribute("error", new HashMap<>());
+        return "alumno-template/modificar";
+    }
+    @PostMapping("/modificar")
+    public String modificarAluProc(@Valid Alumno alumno, BindingResult result, Model model,
+                                  @RequestParam(name= "idAlumno") String idAlumno,
+                                   @RequestParam(name= "nombre") String nombre,
+                                   @RequestParam(name= "apellido") String apellido ) throws SQLException {
+        try{
+            int id =Integer.parseInt(idAlumno);
+            if (id>0) {
+                try{
+                    alumno.setIdAlumno(id);
+                    alumno.setNombre(nombre);
+                    alumno.setApellido(apellido);
+                    int valid = alumnoDao.modify(alumno);
+                    if(valid==1){
+                        model.addAttribute("idAlumno", "IdAlumno");
+                        model.addAttribute("nombre", "Nombre");
+                        model.addAttribute("apellido", "Apellido");
+                        model.addAttribute("titulo", "Alumno Modificado");
+                        model.addAttribute("alumno", alumno);
+                    }
+                } catch (EmptyResultDataAccessException ex) {
+                    Alumno alumno1 =new Alumno();
+                    model.addAttribute("idAlumno", " ");
+                    model.addAttribute("nombre", " ");
+                    model.addAttribute("apellido", " ");
+                    model.addAttribute("titulo", "El alumno no se encuentra en la base de datos");
+                    model.addAttribute("alumno", alumno1);
+                    return "alumno-template/resultado";
+                }
+
+            } else if (result.hasErrors()) {
+                Map<String, String> errores = new HashMap<>();
+                result.getFieldErrors().forEach(err -> {
+                    errores.put(err.getField(), "El campo ".concat(err.getField()).concat(" ").concat(err.getDefaultMessage()));
+                });
+                model.addAttribute("titulo", "Falta datos");
+                model.addAttribute("error", errores);
+                return "alumno-template/modificar";
+            }
+        }catch (NumberFormatException ex){
+            Map<String, String> errores = new HashMap<>();
+            result.getFieldErrors().forEach(err -> {
+                errores.put(err.getField(), "El campo no puede estar vacio");
+            });
+            model.addAttribute("titulo", "Falta datos");
+            model.addAttribute("error", errores);
+            return "alumno-template/modificar";
+        }
+        return "alumno-template/resultado";
     }
 
 }

@@ -3,10 +3,12 @@ package com.bolsadeideas.springboot.web.app.DAO;
 import com.bolsadeideas.springboot.web.app.RowMapper.AlumnoRowMapper;
 import com.bolsadeideas.springboot.web.app.SQLErrorCode.CustomSQLErrorCodeTranslator;
 import com.bolsadeideas.springboot.web.app.entity.Alumno;
+import org.apache.logging.log4j.spi.ObjectThreadContextMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -33,6 +35,7 @@ public class AlumnoDAO {
     private static final String SQL_INSERT = "INSERT INTO alumnos (nombre, apellido) VALUES (?, ?)";
     private static final String SQL_DELETE = "DELETE FROM alumnos WHERE idalumno=?";
     private static final String SQL_GET = "SELECT * FROM alumnos WHERE idalumno = ?";
+    private static final String SQL_MODIFY = "UPDATE alumnos SET nombre=?, SET apellido=? WHERE idalumno=?";
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
@@ -53,7 +56,6 @@ public class AlumnoDAO {
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("alumnos");
 
     }
-
 
     public int getCountOfAlumnos() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM alumnos", Integer.class);
@@ -107,6 +109,11 @@ public class AlumnoDAO {
 
     public int deleteAlu(int idalumno) {
         return jdbcTemplate.update(SQL_DELETE, idalumno);
+    }
+
+    public int modify(Alumno alumnoM){
+       Object[] params = new Object[] {alumnoM.getNombre(),alumnoM.getApellido(),alumnoM.getIdAlumno()};
+       return this.jdbcTemplate.update(SQL_MODIFY,params);
     }
 
     public void addEmplyeeUsingExecuteMethod() {
