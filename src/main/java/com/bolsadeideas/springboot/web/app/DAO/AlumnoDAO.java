@@ -35,7 +35,7 @@ public class AlumnoDAO {
     private static final String SQL_INSERT = "INSERT INTO alumnos (nombre, apellido) VALUES (?, ?)";
     private static final String SQL_DELETE = "DELETE FROM alumnos WHERE idalumno=?";
     private static final String SQL_GET = "SELECT * FROM alumnos WHERE idalumno = ?";
-    private static final String SQL_MODIFY = "UPDATE alumnos SET nombre=?, SET apellido=? WHERE idalumno=?";
+    private static final String SQL_MODIFY = "UPDATE alumnos SET nombre=?, apellido=? WHERE idalumno=?";
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
@@ -111,9 +111,8 @@ public class AlumnoDAO {
         return jdbcTemplate.update(SQL_DELETE, idalumno);
     }
 
-    public int modify(Alumno alumnoM){
-       Object[] params = new Object[] {alumnoM.getNombre(),alumnoM.getApellido(),alumnoM.getIdAlumno()};
-       return this.jdbcTemplate.update(SQL_MODIFY,params);
+    public int modify(Alumno alumno){
+       return this.jdbcTemplate.update(SQL_MODIFY,alumno.getNombre(),alumno.getApellido(),alumno.getIdAlumno());
     }
 
     public void addEmplyeeUsingExecuteMethod() {

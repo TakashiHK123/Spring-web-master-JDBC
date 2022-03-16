@@ -148,6 +148,7 @@ public class AlumnoController {
         model.addAttribute("error", new HashMap<>());
         return "alumno-template/eliminar";
     }
+
     @PostMapping("/eliminar")
     public String eliminarAluProc(@Valid Alumno alumno, BindingResult result, Model model,
                                   @RequestParam(name= "idAlumno") String idAlumno) throws SQLException {
@@ -216,6 +217,7 @@ public class AlumnoController {
                     alumno.setApellido(apellido);
                     int valid = alumnoDao.modify(alumno);
                     if(valid==1){
+
                         model.addAttribute("idAlumno", "IdAlumno");
                         model.addAttribute("nombre", "Nombre");
                         model.addAttribute("apellido", "Apellido");
@@ -252,5 +254,4 @@ public class AlumnoController {
         }
         return "alumno-template/resultado";
     }
-
 }
